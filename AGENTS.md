@@ -41,6 +41,7 @@ Tech stack: ROS 2, colcon, ament_python, Python, rclpy, OpenCV, cv_bridge, senso
 ## Standards & References
 
 - Python 스타일은 패키지별 `ament_flake8`, `ament_pep257` 테스트로 검증한다.
+- Python 주석과 docstring은 특별한 이유가 없으면 한국어로 작성한다.
 - 커밋 메시지는 가능하면 한국어 Conventional Commits 형식을 따른다. 예: `feat(camera_capture): 카메라 캡처 노드 추가`
 - 패키지 동작을 바꾸기 전에 해당 패키지의 `AGENTS.md`가 있으면 먼저 확인한다.
 - 코드와 이 규칙이 어긋나면 같은 변경에서 관련 `AGENTS.md` 갱신을 수행하거나 제안한다.

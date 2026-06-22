@@ -12,6 +12,8 @@ from vision_msgs.msg import Detection2D
 from vision_msgs.msg import Detection2DArray
 from vision_msgs.msg import ObjectHypothesisWithPose
 
+from object_detector.parameters import declare_detector_parameters
+from object_detector.parameters import read_detector_parameters
 from object_detector.yolo_detector import YoloDetector
 
 
@@ -65,48 +67,20 @@ class YoloDetectorNode(Node):
         """ROS 파라미터를 읽고 구독/발행 리소스를 생성합니다."""
         super().__init__('yolo_detector')
 
-        self.declare_parameter('input_image_topic', '/camera/image_raw')
-        self.declare_parameter('detections_topic', '/detections')
-        self.declare_parameter('annotated_image_topic', '/detections/image')
-        self.declare_parameter('model_path', 'yolo11n.pt')
-        self.declare_parameter('confidence_threshold', 0.25)
-        self.declare_parameter('iou_threshold', 0.7)
-        self.declare_parameter('image_size', 640)
-        self.declare_parameter('device', '')
-        self.declare_parameter('publish_annotated_image', True)
-
-        self.input_image_topic = self._string_parameter('input_image_topic')
-        self.detections_topic = self._string_parameter('detections_topic')
-        self.annotated_image_topic = self._string_parameter(
-            'annotated_image_topic',
-        )
-        self.publish_annotated_image = self._bool_parameter(
-            'publish_annotated_image',
-        )
-
-        confidence_threshold = self._bounded_float_parameter(
-            'confidence_threshold',
-            0.25,
-            0.0,
-            1.0,
-        )
-        iou_threshold = self._bounded_float_parameter(
-            'iou_threshold',
-            0.7,
-            0.0,
-            1.0,
-        )
-        image_size = self._positive_int_parameter('image_size', 640)
-        model_path = self._string_parameter('model_path')
-        device = self._string_parameter('device')
+        declare_detector_parameters(self)
+        parameters = read_detector_parameters(self)
+        self.input_image_topic = parameters.input_image_topic
+        self.detections_topic = parameters.detections_topic
+        self.annotated_image_topic = parameters.annotated_image_topic
+        self.publish_annotated_image = parameters.publish_annotated_image
 
         self.bridge = CvBridge()
         self.detector = YoloDetector(
-            model_path=model_path,
-            confidence_threshold=confidence_threshold,
-            iou_threshold=iou_threshold,
-            image_size=image_size,
-            device=device,
+            model_path=parameters.model_path,
+            confidence_threshold=parameters.confidence_threshold,
+            iou_threshold=parameters.iou_threshold,
+            image_size=parameters.image_size,
+            device=parameters.device,
         )
         self.frame_processor = DetectionFrameProcessor(
             self.bridge,
@@ -134,7 +108,7 @@ class YoloDetectorNode(Node):
 
         self.get_logger().info(
             'Detecting objects from %s with %s'
-            % (self.input_image_topic, model_path)
+            % (self.input_image_topic, parameters.model_path)
         )
 
     def _image_callback(self, message):
@@ -150,37 +124,6 @@ class YoloDetectorNode(Node):
             result.annotated_message is not None
         ):
             self.annotated_image_publisher.publish(result.annotated_message)
-
-    def _string_parameter(self, name):
-        return self.get_parameter(name).get_parameter_value().string_value
-
-    def _bool_parameter(self, name):
-        return self.get_parameter(name).get_parameter_value().bool_value
-
-    def _bounded_float_parameter(
-        self,
-        name,
-        default_value,
-        minimum,
-        maximum,
-    ):
-        value = self.get_parameter(name).get_parameter_value().double_value
-        if minimum <= value <= maximum:
-            return value
-        self.get_logger().warn(
-            '%s must be between %.1f and %.1f; using %.2f'
-            % (name, minimum, maximum, default_value)
-        )
-        return default_value
-
-    def _positive_int_parameter(self, name, default_value):
-        value = self.get_parameter(name).get_parameter_value().integer_value
-        if value > 0:
-            return value
-        self.get_logger().warn(
-            '%s must be positive; using %d' % (name, default_value)
-        )
-        return default_value
 
 
 def build_detection_array(header, detections):

@@ -7,6 +7,9 @@ from rclpy.node import Node
 from rclpy.qos import qos_profile_sensor_data
 from sensor_msgs.msg import Image
 
+from camera_capture.parameters import declare_camera_parameters
+from camera_capture.parameters import read_camera_parameters
+
 
 class CameraCaptureNode(Node):
     """OpenCV VideoCapture에서 프레임을 가져와 발행합니다."""
@@ -14,49 +17,15 @@ class CameraCaptureNode(Node):
     def __init__(self):
         super().__init__('camera_capture')
 
-        self.declare_parameter('camera_index', 0)
-        self.declare_parameter('image_topic', '/camera/image_raw')
-        self.declare_parameter('frame_id', 'camera_frame')
-        self.declare_parameter('width', 640)
-        self.declare_parameter('height', 480)
-        self.declare_parameter('fps', 30.0)
-        self.declare_parameter('retry_interval_sec', 2.0)
-
-        self.camera_index = (
-            self.get_parameter('camera_index').get_parameter_value()
-            .integer_value
-        )
-        self.image_topic = (
-            self.get_parameter('image_topic').get_parameter_value()
-            .string_value
-        )
-        self.frame_id = (
-            self.get_parameter('frame_id').get_parameter_value()
-            .string_value
-        )
-        self.width = (
-            self.get_parameter('width').get_parameter_value().integer_value
-        )
-        self.height = (
-            self.get_parameter('height').get_parameter_value()
-            .integer_value
-        )
-        self.fps = (
-            self.get_parameter('fps').get_parameter_value().double_value
-        )
-        self.retry_interval_sec = (
-            self.get_parameter('retry_interval_sec').get_parameter_value()
-            .double_value
-        )
-
-        if self.fps <= 0.0:
-            self.get_logger().warn('fps must be positive; using 30.0')
-            self.fps = 30.0
-        if self.retry_interval_sec <= 0.0:
-            self.get_logger().warn(
-                'retry_interval_sec must be positive; using 2.0'
-            )
-            self.retry_interval_sec = 2.0
+        declare_camera_parameters(self)
+        parameters = read_camera_parameters(self)
+        self.camera_index = parameters.camera_index
+        self.image_topic = parameters.image_topic
+        self.frame_id = parameters.frame_id
+        self.width = parameters.width
+        self.height = parameters.height
+        self.fps = parameters.fps
+        self.retry_interval_sec = parameters.retry_interval_sec
 
         self.bridge = CvBridge()
         self.capture = None
