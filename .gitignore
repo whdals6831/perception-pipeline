@@ -218,6 +218,9 @@ __pypackages__/
 
 # Celery stuff
 celerybeat-schedule
+
+### Project model weights ###
+*.pt
 celerybeat.pid
 
 # SageMath parsed files

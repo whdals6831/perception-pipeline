@@ -1,3 +1,6 @@
+import os
+from glob import glob
+
 from setuptools import find_packages, setup
 
 package_name = 'object_detector'
@@ -10,8 +13,13 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
+        (os.path.join('share', package_name, 'launch'),
+            glob(os.path.join('launch', '*.launch.py'))),
     ],
-    install_requires=['setuptools'],
+    install_requires=[
+        'setuptools',
+        'ultralytics',
+    ],
     zip_safe=True,
     maintainer='stupidbox',
     maintainer_email='whdals6831@gmail.com',
@@ -24,6 +32,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
+            'yolo_detector_node = object_detector.yolo_detector_node:main',
         ],
     },
 )

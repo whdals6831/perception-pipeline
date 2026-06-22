@@ -10,6 +10,8 @@
 - 빌드 후 워크스페이스 로드: zsh는 `source install/setup.zsh`, bash는 `source install/setup.bash`
 - 워크스페이스 로드 후 카메라 노드 실행: `ros2 run camera_capture camera_capture_node`
 - 워크스페이스 로드 후 카메라 런치 실행: `ros2 launch camera_capture camera_capture.launch.py`
+- 워크스페이스 로드 후 YOLO 탐지 노드 실행: `ros2 run object_detector yolo_detector_node`
+- 워크스페이스 로드 후 YOLO 탐지 런치 실행: `ros2 launch object_detector yolo_detector.launch.py`
 
 ## Golden Rules
 
@@ -17,7 +19,7 @@
 
 - 이 저장소는 ROS 2 colcon 워크스페이스로 취급한다. 패키지 코드는 `src/<package_name>` 아래에 둔다.
 - `build/`, `install/`, `log/`의 생성 결과물은 수정하지 않는다.
-- `__pycache__/`, `.pytest_cache/`, `.DS_Store`, colcon 생성 결과물은 커밋하지 않는다.
+- `__pycache__/`, `.pytest_cache/`, `.DS_Store`, colcon 생성 결과물, 모델 weight 파일은 커밋하지 않는다.
 - 런타임 의존성, 런치 파일, 콘솔 스크립트, 설치 데이터를 추가할 때 ROS 패키지 메타데이터를 함께 갱신한다.
 - 장비별 카메라 디바이스, 로컬 절대 경로, 비밀값을 하드코딩하지 않는다.
 
@@ -34,7 +36,7 @@
 
 이 워크스페이스는 카메라 프레임 캡처와 후속 탐지를 위한 ROS 2 Python 기반 perception pipeline을 구현한다. 현재 패키지는 초기 단계이므로 작고 테스트 가능하며 ROS 관례에 맞게 유지한다.
 
-Tech stack: ROS 2, colcon, ament_python, Python, rclpy, OpenCV, cv_bridge, sensor_msgs, std_msgs, pytest.
+Tech stack: ROS 2, colcon, ament_python, Python, rclpy, OpenCV, cv_bridge, sensor_msgs, vision_msgs, std_msgs, Ultralytics YOLO, pytest.
 
 ## Standards & References
 
