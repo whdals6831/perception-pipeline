@@ -10,8 +10,10 @@
 - 빌드 후 워크스페이스 로드: zsh는 `source install/setup.zsh`, bash는 `source install/setup.bash`
 - 워크스페이스 로드 후 카메라 노드 실행: `ros2 run camera_capture camera_capture_node`
 - 워크스페이스 로드 후 카메라 런치 실행: `ros2 launch camera_capture camera_capture.launch.py`
+- 워크스페이스 로드 후 비디오 파일 노드 실행: `ros2 run video_capture video_capture_node --ros-args -p video_path:=<video_path>`
+- 워크스페이스 로드 후 비디오 파일 런치 실행: `ros2 launch video_capture video_capture.launch.py video_path:=<video_path>`
 - 워크스페이스 로드 후 YOLO 탐지 노드 실행: `ros2 run object_detector yolo_detector_node`
-- 워크스페이스 로드 후 YOLO 탐지 런치 실행: `ros2 launch object_detector yolo_detector.launch.py`
+- 워크스페이스 로드 후 YOLO 탐지 런치 실행: `ros2 launch object_detector yolo_detector.launch.py input_image_topic:=<input_image_topic>`
 
 ## Golden Rules
 
@@ -49,4 +51,5 @@ Tech stack: ROS 2, colcon, ament_python, Python, rclpy, OpenCV, cv_bridge, senso
 ## Context Map
 
 - **[카메라 캡처 패키지](./src/camera_capture/AGENTS.md)** — 카메라 노드, OpenCV 캡처, 이미지 발행, 카메라 런치 변경 시.
+- **[비디오 파일 캡처 패키지](./src/video_capture/AGENTS.md)** — 로컬 비디오 파일 입력, 반복 재생, `/video/image_raw` 발행 변경 시.
 - **[객체 탐지 패키지](./src/object_detector/AGENTS.md)** — 탐지 패키지 스캐폴딩, 메시지 의존성, 향후 탐지 노드 변경 시.
