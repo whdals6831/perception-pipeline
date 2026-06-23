@@ -12,6 +12,8 @@
 - 워크스페이스 로드 후 카메라 런치 실행: `ros2 launch camera_capture camera_capture.launch.py`
 - 워크스페이스 로드 후 비디오 파일 노드 실행: `ros2 run video_capture video_capture_node --ros-args -p video_path:=<video_path>`
 - 워크스페이스 로드 후 비디오 파일 런치 실행: `ros2 launch video_capture video_capture.launch.py video_path:=<video_path>`
+- 워크스페이스 로드 후 정적 이미지 노드 실행: `ros2 run image_capture image_capture_node --ros-args -p image_path:=<image_path>`
+- 워크스페이스 로드 후 정적 이미지 런치 실행: `ros2 launch image_capture image_capture.launch.py image_path:=<image_path>`
 - 워크스페이스 로드 후 YOLO 탐지 노드 실행: `ros2 run object_detector yolo_detector_node`
 - 워크스페이스 로드 후 YOLO 탐지 런치 실행: `ros2 launch object_detector yolo_detector.launch.py input_image_topic:=<input_image_topic>`
 
@@ -52,4 +54,5 @@ Tech stack: ROS 2, colcon, ament_python, Python, rclpy, OpenCV, cv_bridge, senso
 
 - **[카메라 캡처 패키지](./src/camera_capture/AGENTS.md)** — 카메라 노드, OpenCV 캡처, 이미지 발행, 카메라 런치 변경 시.
 - **[비디오 파일 캡처 패키지](./src/video_capture/AGENTS.md)** — 로컬 비디오 파일 입력, 반복 재생, `/video/image_raw` 발행 변경 시.
+- **[정적 이미지 캡처 패키지](./src/image_capture/AGENTS.md)** — 단일 이미지 파일 반복 발행, `/image/image_raw` 토픽, 이미지 런치 변경 시.
 - **[객체 탐지 패키지](./src/object_detector/AGENTS.md)** — 탐지 패키지 스캐폴딩, 메시지 의존성, 향후 탐지 노드 변경 시.
