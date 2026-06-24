@@ -8,15 +8,12 @@
 - 단일 패키지 테스트 실행: `colcon test --packages-select <package_name> --event-handlers console_direct+`
 - 테스트 결과 확인: `colcon test-result --verbose`
 - 빌드 후 워크스페이스 로드: zsh는 `source install/setup.zsh`, bash는 `source install/setup.bash`
-- 워크스페이스 로드 후 카메라 노드 실행: `ros2 run camera_capture camera_capture_node`
 - 워크스페이스 로드 후 카메라 런치 실행: `ros2 launch camera_capture camera_capture.launch.py`
-- 워크스페이스 로드 후 비디오 파일 노드 실행: `ros2 run video_capture video_capture_node --ros-args -p video_path:=<video_path>`
 - 워크스페이스 로드 후 비디오 파일 런치 실행: `ros2 launch video_capture video_capture.launch.py video_path:=<video_path>`
-- 워크스페이스 로드 후 정적 이미지 노드 실행: `ros2 run image_capture image_capture_node --ros-args -p image_path:=<image_path>`
 - 워크스페이스 로드 후 정적 이미지 런치 실행: `ros2 launch image_capture image_capture.launch.py image_path:=<image_path>`
-- 워크스페이스 로드 후 YOLO 탐지 노드 실행: `ros2 run object_detector yolo_detector_node`
 - 워크스페이스 로드 후 YOLO 탐지 런치 실행: `ros2 launch object_detector yolo_detector.launch.py input_image_topic:=<input_image_topic> model_paths:=<model_path>[,<model_path>...]`
 - 다중 YOLO 모델 실행 예시: `ros2 launch object_detector yolo_detector.launch.py model_paths:=yolo11n.pt,/path/to/custom_best.pt duplicate_iou_threshold:=0.7`
+- 워크스페이스 로드 후 라이다 전처리 런치 실행: `ros2 launch lidar_preprocessor lidar_preprocessor.launch.py input_topic:=<point_cloud_topic>`
 
 ## Golden Rules
 
@@ -39,9 +36,9 @@
 
 ## Project Context
 
-이 워크스페이스는 카메라 프레임 캡처와 후속 탐지를 위한 ROS 2 Python 기반 추론 파이프라인을 구현한다. 현재 패키지는 초기 단계이므로 작고 테스트 가능하며 ROS 관례에 맞게 유지한다.
+이 워크스페이스는 카메라/이미지/비디오 입력, 라이다 점군 전처리, 후속 탐지를 위한 ROS 2 기반 추론 파이프라인을 구현한다. 현재 패키지는 초기 단계이므로 작고 테스트 가능하며 ROS 관례에 맞게 유지한다.
 
-Tech stack: ROS 2, colcon, ament_python, Python, rclpy, OpenCV, cv_bridge, sensor_msgs, vision_msgs, std_msgs, Ultralytics YOLO, pytest.
+Tech stack: ROS 2, colcon, ament_python, ament_cmake, Python, C++, rclpy, rclcpp, OpenCV, cv_bridge, PCL, pcl_conversions, sensor_msgs, vision_msgs, std_msgs, Ultralytics YOLO, pytest.
 
 ## Standards & References
 
@@ -58,3 +55,4 @@ Tech stack: ROS 2, colcon, ament_python, Python, rclpy, OpenCV, cv_bridge, senso
 - **[비디오 파일 캡처 패키지](./src/video_capture/AGENTS.md)** — 로컬 비디오 파일 입력, 반복 재생, `/video/image_raw` 발행 변경 시.
 - **[정적 이미지 캡처 패키지](./src/image_capture/AGENTS.md)** — 단일 이미지 파일 반복 발행, `/image/image_raw` 토픽, 이미지 런치 변경 시.
 - **[객체 탐지 패키지](./src/object_detector/AGENTS.md)** — 탐지 패키지 스캐폴딩, 메시지 의존성, 향후 탐지 노드 변경 시.
+- **[라이다 전처리 패키지](./src/lidar_preprocessor/AGENTS.md)** — PointCloud2 구독, PCL 다운샘플링, 도로 바닥 제거, RViz 확인 토픽 변경 시.
