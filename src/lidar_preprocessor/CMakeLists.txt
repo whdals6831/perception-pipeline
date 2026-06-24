@@ -5,9 +5,31 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
-# find dependencies
 find_package(ament_cmake REQUIRED)
+find_package(PCL REQUIRED COMPONENTS filters)
+find_package(pcl_conversions REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(sensor_msgs REQUIRED)
+
+add_executable(lidar_preprocessor_node src/lidar_preprocessor_node.cpp)
+target_include_directories(lidar_preprocessor_node SYSTEM PRIVATE ${PCL_INCLUDE_DIRS})
+ament_target_dependencies(
+  lidar_preprocessor_node
+  pcl_conversions
+  rclcpp
+  sensor_msgs
+)
+target_link_libraries(lidar_preprocessor_node ${PCL_LIBRARIES})
+
+install(TARGETS
+  lidar_preprocessor_node
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+install(DIRECTORY
+  launch
+  DESTINATION share/${PROJECT_NAME}
+)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
