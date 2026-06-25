@@ -18,13 +18,14 @@ def generate_launch_description():
     slope = LaunchConfiguration("slope")
     initial_distance = LaunchConfiguration("initial_distance")
     max_distance = LaunchConfiguration("max_distance")
-    roi_min_x = LaunchConfiguration("roi_min_x")
-    roi_max_x = LaunchConfiguration("roi_max_x")
-    roi_min_y = LaunchConfiguration("roi_min_y")
-    roi_max_y = LaunchConfiguration("roi_max_y")
-    roi_min_z = LaunchConfiguration("roi_min_z")
-    roi_max_z = LaunchConfiguration("roi_max_z")
-    roi_point_threshold = LaunchConfiguration("roi_point_threshold")
+    roi_names = LaunchConfiguration("roi_names")
+    roi_min_xs = LaunchConfiguration("roi_min_xs")
+    roi_max_xs = LaunchConfiguration("roi_max_xs")
+    roi_min_ys = LaunchConfiguration("roi_min_ys")
+    roi_max_ys = LaunchConfiguration("roi_max_ys")
+    roi_min_zs = LaunchConfiguration("roi_min_zs")
+    roi_max_zs = LaunchConfiguration("roi_max_zs")
+    roi_point_thresholds = LaunchConfiguration("roi_point_thresholds")
 
     return LaunchDescription(
         [
@@ -43,13 +44,14 @@ def generate_launch_description():
             DeclareLaunchArgument("slope", default_value="1.0"),
             DeclareLaunchArgument("initial_distance", default_value="0.5"),
             DeclareLaunchArgument("max_distance", default_value="50.0"),
-            DeclareLaunchArgument("roi_min_x", default_value="-1.0"),
-            DeclareLaunchArgument("roi_max_x", default_value="1.0"),
-            DeclareLaunchArgument("roi_min_y", default_value="-1.0"),
-            DeclareLaunchArgument("roi_max_y", default_value="1.0"),
-            DeclareLaunchArgument("roi_min_z", default_value="-1.0"),
-            DeclareLaunchArgument("roi_max_z", default_value="1.0"),
-            DeclareLaunchArgument("roi_point_threshold", default_value="50"),
+            DeclareLaunchArgument("roi_names", default_value="['default', 'default_2']"),
+            DeclareLaunchArgument("roi_min_xs", default_value="[-3.0, 1.0]"),
+            DeclareLaunchArgument("roi_max_xs", default_value="[-1.0, 3.0]"),
+            DeclareLaunchArgument("roi_min_ys", default_value="[-1.0, -1.0]"),
+            DeclareLaunchArgument("roi_max_ys", default_value="[1.0, 1.0]"),
+            DeclareLaunchArgument("roi_min_zs", default_value="[0.0, 0.0]"),
+            DeclareLaunchArgument("roi_max_zs", default_value="[1.0, 1.0]"),
+            DeclareLaunchArgument("roi_point_thresholds", default_value="[50, 50]"),
             Node(
                 package="lidar_preprocessor",
                 executable="lidar_preprocessor_node",
@@ -92,33 +94,37 @@ def generate_launch_description():
                             max_distance,
                             value_type=float,
                         ),
-                        "roi_min_x": ParameterValue(
-                            roi_min_x,
-                            value_type=float,
+                        "roi_names": ParameterValue(
+                            roi_names,
+                            value_type=list[str],
                         ),
-                        "roi_max_x": ParameterValue(
-                            roi_max_x,
-                            value_type=float,
+                        "roi_min_xs": ParameterValue(
+                            roi_min_xs,
+                            value_type=list[float],
                         ),
-                        "roi_min_y": ParameterValue(
-                            roi_min_y,
-                            value_type=float,
+                        "roi_max_xs": ParameterValue(
+                            roi_max_xs,
+                            value_type=list[float],
                         ),
-                        "roi_max_y": ParameterValue(
-                            roi_max_y,
-                            value_type=float,
+                        "roi_min_ys": ParameterValue(
+                            roi_min_ys,
+                            value_type=list[float],
                         ),
-                        "roi_min_z": ParameterValue(
-                            roi_min_z,
-                            value_type=float,
+                        "roi_max_ys": ParameterValue(
+                            roi_max_ys,
+                            value_type=list[float],
                         ),
-                        "roi_max_z": ParameterValue(
-                            roi_max_z,
-                            value_type=float,
+                        "roi_min_zs": ParameterValue(
+                            roi_min_zs,
+                            value_type=list[float],
                         ),
-                        "roi_point_threshold": ParameterValue(
-                            roi_point_threshold,
-                            value_type=int,
+                        "roi_max_zs": ParameterValue(
+                            roi_max_zs,
+                            value_type=list[float],
+                        ),
+                        "roi_point_thresholds": ParameterValue(
+                            roi_point_thresholds,
+                            value_type=list[int],
                         ),
                     }
                 ],

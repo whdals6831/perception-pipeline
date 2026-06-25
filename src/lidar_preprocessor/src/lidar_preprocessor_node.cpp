@@ -1,6 +1,9 @@
 #include <memory>
 #include <string>
+#include <vector>
 
+#include "lidar_preprocessor/msg/roi_alarm.hpp"
+#include "lidar_preprocessor/msg/roi_alarm_array.hpp"
 #include "pcl/filters/extract_indices.h"
 #include "pcl/filters/voxel_grid.h"
 #include "pcl/point_cloud.h"
@@ -9,8 +12,7 @@
 #include "pcl_conversions/pcl_conversions.h"
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/point_cloud2.hpp"
-#include "std_msgs/msg/bool.hpp"
-#include "visualization_msgs/msg/marker.hpp"
+#include "visualization_msgs/msg/marker_array.hpp"
 
 class LidarPreprocessorNode : public rclcpp::Node
 {
@@ -33,19 +35,25 @@ public:
     slope_ = declare_parameter<double>("slope", 1.0);
     initial_distance_ = declare_parameter<double>("initial_distance", 0.5);
     max_distance_ = declare_parameter<double>("max_distance", 50.0);
-    roi_min_x_ = declare_parameter<double>("roi_min_x", -1.0);
-    roi_max_x_ = declare_parameter<double>("roi_max_x", 1.0);
-    roi_min_y_ = declare_parameter<double>("roi_min_y", -1.0);
-    roi_max_y_ = declare_parameter<double>("roi_max_y", 1.0);
-    roi_min_z_ = declare_parameter<double>("roi_min_z", -1.0);
-    roi_max_z_ = declare_parameter<double>("roi_max_z", 1.0);
-    roi_point_threshold_ = declare_parameter<int>("roi_point_threshold", 50);
+    roi_names_ = declare_parameter<std::vector<std::string>>("roi_names", {"default", "default_2"});
+    roi_min_xs_ = declare_parameter<std::vector<double>>("roi_min_xs", {-3.0, 1.0});
+    roi_max_xs_ = declare_parameter<std::vector<double>>("roi_max_xs", {-1.0, 3.0});
+    roi_min_ys_ = declare_parameter<std::vector<double>>("roi_min_ys", {-1.0, -1.0});
+    roi_max_ys_ = declare_parameter<std::vector<double>>("roi_max_ys", {1.0, 1.0});
+    roi_min_zs_ = declare_parameter<std::vector<double>>("roi_min_zs", {-1.0, -1.0});
+    roi_max_zs_ = declare_parameter<std::vector<double>>("roi_max_zs", {1.0, 1.0});
+    roi_point_thresholds_ = declare_parameter<std::vector<int64_t>>(
+      "roi_point_thresholds",
+      {50, 50});
+    roi_count_ = valid_roi_count();
 
     const auto qos = rclcpp::SensorDataQoS();
     preprocessed_pub_ =
       create_publisher<sensor_msgs::msg::PointCloud2>(preprocessed_topic, qos);
-    roi_alarm_pub_ = create_publisher<std_msgs::msg::Bool>(roi_alarm_topic, qos);
-    roi_marker_pub_ = create_publisher<visualization_msgs::msg::Marker>(roi_marker_topic, qos);
+    roi_alarm_pub_ = create_publisher<lidar_preprocessor::msg::RoiAlarmArray>(
+      roi_alarm_topic, qos);
+    roi_marker_pub_ = create_publisher<visualization_msgs::msg::MarkerArray>(
+      roi_marker_topic, qos);
     subscription_ = create_subscription<sensor_msgs::msg::PointCloud2>(
       input_topic_, qos,
       [this](sensor_msgs::msg::PointCloud2::ConstSharedPtr msg) {
@@ -127,43 +135,80 @@ private:
       return;
     }
 
-    int count = 0;
-    for (const auto & point : cloud.points) {
-      if (
-        point.x >= roi_min_x_ && point.x <= roi_max_x_ &&
-        point.y >= roi_min_y_ && point.y <= roi_max_y_ &&
-        point.z >= roi_min_z_ && point.z <= roi_max_z_)
-      {
-        ++count;
+    lidar_preprocessor::msg::RoiAlarmArray alarms;
+    alarms.header = header;
+
+    std::vector<bool> alarm_states;
+    alarm_states.reserve(roi_count_);
+    for (size_t i = 0; i < roi_count_; ++i) {
+      uint32_t count = 0;
+      for (const auto & point : cloud.points) {
+        if (
+          point.x >= roi_min_xs_[i] && point.x <= roi_max_xs_[i] &&
+          point.y >= roi_min_ys_[i] && point.y <= roi_max_ys_[i] &&
+          point.z >= roi_min_zs_[i] && point.z <= roi_max_zs_[i])
+        {
+          ++count;
+        }
       }
+
+      lidar_preprocessor::msg::RoiAlarm alarm;
+      alarm.name = roi_names_[i];
+      alarm.point_count = count;
+      alarm.threshold = static_cast<uint32_t>(roi_point_thresholds_[i]);
+      alarm.alarm = count >= alarm.threshold;
+      alarm_states.push_back(alarm.alarm);
+      alarms.alarms.push_back(alarm);
     }
 
-    std_msgs::msg::Bool alarm;
-    alarm.data = count >= roi_point_threshold_;
-    roi_alarm_pub_->publish(alarm);
-    publish_roi_marker(header, alarm.data);
+    roi_alarm_pub_->publish(alarms);
+    publish_roi_markers(header, alarm_states);
   }
 
-  void publish_roi_marker(const std_msgs::msg::Header & header, const bool alarm) const
+  void publish_roi_markers(
+    const std_msgs::msg::Header & header,
+    const std::vector<bool> & alarm_states) const
   {
-    visualization_msgs::msg::Marker marker;
-    marker.header = header;
-    marker.ns = "lidar_roi";
-    marker.id = 0;
-    marker.type = visualization_msgs::msg::Marker::CUBE;
-    marker.action = visualization_msgs::msg::Marker::ADD;
-    marker.pose.position.x = (roi_min_x_ + roi_max_x_) / 2.0;
-    marker.pose.position.y = (roi_min_y_ + roi_max_y_) / 2.0;
-    marker.pose.position.z = (roi_min_z_ + roi_max_z_) / 2.0;
-    marker.pose.orientation.w = 1.0;
-    marker.scale.x = roi_max_x_ - roi_min_x_;
-    marker.scale.y = roi_max_y_ - roi_min_y_;
-    marker.scale.z = roi_max_z_ - roi_min_z_;
-    marker.color.r = alarm ? 1.0F : 0.0F;
-    marker.color.g = alarm ? 0.0F : 1.0F;
-    marker.color.b = 0.0F;
-    marker.color.a = 0.25F;
-    roi_marker_pub_->publish(marker);
+    visualization_msgs::msg::MarkerArray markers;
+    for (size_t i = 0; i < roi_count_; ++i) {
+      visualization_msgs::msg::Marker marker;
+      marker.header = header;
+      marker.ns = "lidar_roi";
+      marker.id = static_cast<int32_t>(i);
+      marker.type = visualization_msgs::msg::Marker::CUBE;
+      marker.action = visualization_msgs::msg::Marker::ADD;
+      marker.pose.position.x = (roi_min_xs_[i] + roi_max_xs_[i]) / 2.0;
+      marker.pose.position.y = (roi_min_ys_[i] + roi_max_ys_[i]) / 2.0;
+      marker.pose.position.z = (roi_min_zs_[i] + roi_max_zs_[i]) / 2.0;
+      marker.pose.orientation.w = 1.0;
+      marker.scale.x = roi_max_xs_[i] - roi_min_xs_[i];
+      marker.scale.y = roi_max_ys_[i] - roi_min_ys_[i];
+      marker.scale.z = roi_max_zs_[i] - roi_min_zs_[i];
+      marker.color.r = alarm_states[i] ? 1.0F : 0.0F;
+      marker.color.g = alarm_states[i] ? 0.0F : 1.0F;
+      marker.color.b = 0.0F;
+      marker.color.a = 0.25F;
+      markers.markers.push_back(marker);
+    }
+    roi_marker_pub_->publish(markers);
+  }
+
+  size_t valid_roi_count() const
+  {
+    const auto count = roi_names_.size();
+    if (
+      roi_min_xs_.size() == count && roi_max_xs_.size() == count &&
+      roi_min_ys_.size() == count && roi_max_ys_.size() == count &&
+      roi_min_zs_.size() == count && roi_max_zs_.size() == count &&
+      roi_point_thresholds_.size() == count)
+    {
+      return count;
+    }
+
+    RCLCPP_ERROR(
+      get_logger(),
+      "ROI parameter arrays must have the same length; ROI alarm is disabled.");
+    return 0;
   }
 
   std::string input_topic_;
@@ -175,17 +220,19 @@ private:
   double slope_;
   double initial_distance_;
   double max_distance_;
-  double roi_min_x_;
-  double roi_max_x_;
-  double roi_min_y_;
-  double roi_max_y_;
-  double roi_min_z_;
-  double roi_max_z_;
-  int roi_point_threshold_;
+  std::vector<std::string> roi_names_;
+  std::vector<double> roi_min_xs_;
+  std::vector<double> roi_max_xs_;
+  std::vector<double> roi_min_ys_;
+  std::vector<double> roi_max_ys_;
+  std::vector<double> roi_min_zs_;
+  std::vector<double> roi_max_zs_;
+  std::vector<int64_t> roi_point_thresholds_;
+  size_t roi_count_;
   rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr subscription_;
   rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr preprocessed_pub_;
-  rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr roi_alarm_pub_;
-  rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr roi_marker_pub_;
+  rclcpp::Publisher<lidar_preprocessor::msg::RoiAlarmArray>::SharedPtr roi_alarm_pub_;
+  rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr roi_marker_pub_;
 };
 
 int main(int argc, char * argv[])
