@@ -35,7 +35,10 @@ def launch_setup(context, *args, **kwargs):
     for name, value_type in PARAMETER_TYPES.items():
         value = LaunchConfiguration(name).perform(context)
         if value != "":
-            parameters[name] = ParameterValue(value, value_type=value_type)
+            parameters[name] = ParameterValue(
+                LaunchConfiguration(name),
+                value_type=value_type,
+            )
 
     return [
         Node(
