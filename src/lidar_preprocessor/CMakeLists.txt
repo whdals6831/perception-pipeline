@@ -10,6 +10,8 @@ find_package(PCL REQUIRED COMPONENTS filters segmentation)
 find_package(pcl_conversions REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(visualization_msgs REQUIRED)
 
 add_executable(lidar_preprocessor_node src/lidar_preprocessor_node.cpp)
 target_include_directories(lidar_preprocessor_node SYSTEM PRIVATE ${PCL_INCLUDE_DIRS})
@@ -18,6 +20,8 @@ ament_target_dependencies(
   pcl_conversions
   rclcpp
   sensor_msgs
+  std_msgs
+  visualization_msgs
 )
 target_link_libraries(lidar_preprocessor_node ${PCL_LIBRARIES})
 
