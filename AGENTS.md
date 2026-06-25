@@ -14,6 +14,7 @@
 - 워크스페이스 로드 후 YOLO 탐지 런치 실행: `ros2 launch object_detector yolo_detector.launch.py input_image_topic:=<input_image_topic> model_paths:=<model_path>[,<model_path>...]`
 - 다중 YOLO 모델 실행 예시: `ros2 launch object_detector yolo_detector.launch.py model_paths:=yolo11n.pt,/path/to/custom_best.pt duplicate_iou_threshold:=0.7`
 - 워크스페이스 로드 후 라이다 전처리 런치 실행: `ros2 launch lidar_preprocessor lidar_preprocessor.launch.py input_topic:=<point_cloud_topic>`
+- 워크스페이스 로드 후 모니터링 fusion 런치 실행: `ros2 launch monitoring_fusion monitoring_fusion.launch.py`
 
 ## Golden Rules
 
@@ -36,9 +37,9 @@
 
 ## Project Context
 
-이 워크스페이스는 카메라/이미지/비디오 입력, 라이다 점군 전처리, 후속 탐지를 위한 ROS 2 기반 추론 파이프라인을 구현한다. 현재 패키지는 초기 단계이므로 작고 테스트 가능하며 ROS 관례에 맞게 유지한다.
+이 워크스페이스는 카메라/이미지/비디오 입력, 라이다 점군 전처리, 객체 탐지, 모니터링 알람 결합을 위한 ROS 2 기반 추론 파이프라인을 구현한다. 현재 패키지는 초기 단계이므로 작고 테스트 가능하며 ROS 관례에 맞게 유지한다.
 
-Tech stack: ROS 2, colcon, ament_python, ament_cmake, Python, C++, rclpy, rclcpp, OpenCV, cv_bridge, PCL, pcl_conversions, sensor_msgs, vision_msgs, std_msgs, Ultralytics YOLO, pytest.
+Tech stack: ROS 2, colcon, ament_python, ament_cmake, Python, C++, rclpy, rclcpp, OpenCV, cv_bridge, PCL, pcl_conversions, sensor_msgs, vision_msgs, std_msgs, visualization_msgs, Ultralytics YOLO, pytest.
 
 ## Standards & References
 
@@ -56,3 +57,4 @@ Tech stack: ROS 2, colcon, ament_python, ament_cmake, Python, C++, rclpy, rclcpp
 - **[정적 이미지 캡처 패키지](./src/image_capture/AGENTS.md)** — 단일 이미지 파일 반복 발행, `/image/image_raw` 토픽, 이미지 런치 변경 시.
 - **[객체 탐지 패키지](./src/object_detector/AGENTS.md)** — 탐지 패키지 스캐폴딩, 메시지 의존성, 향후 탐지 노드 변경 시.
 - **[라이다 전처리 패키지](./src/lidar_preprocessor/AGENTS.md)** — PointCloud2 구독, PCL 다운샘플링, 도로 바닥 제거, 다중 ROI 알람/마커 변경 시.
+- **[모니터링 fusion 패키지](./src/monitoring_fusion/AGENTS.md)** — 라이다 ROI 알람과 객체 탐지 결과를 최종 모니터링 이벤트로 결합할 때.
