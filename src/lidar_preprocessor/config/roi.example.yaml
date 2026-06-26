@@ -1,0 +1,10 @@
+lidar_preprocessor_node:
+  ros__parameters:
+    roi_names: ["danger_zone", "warning_zone"]
+    roi_min_xs: [0.0, 1.0]
+    roi_max_xs: [1.0, 2.0]
+    roi_min_ys: [0.0, 0.0]
+    roi_max_ys: [1.0, 1.0]
+    roi_min_zs: [0.0, 0.0]
+    roi_max_zs: [1.0, 1.0]
+    roi_point_thresholds: [50, 50]

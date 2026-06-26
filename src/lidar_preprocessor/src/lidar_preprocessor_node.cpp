@@ -36,18 +36,16 @@ public:
     slope_ = declare_parameter<double>("slope", 1.0);
     initial_distance_ = declare_parameter<double>("initial_distance", 0.5);
     max_distance_ = declare_parameter<double>("max_distance", 50.0);
-    roi_names_ = declare_parameter<std::vector<std::string>>(
-      "roi_names",
-      {"danger_zone", "warning_zone"});
-    roi_min_xs_ = declare_parameter<std::vector<double>>("roi_min_xs", {0.0, 1.0});
-    roi_max_xs_ = declare_parameter<std::vector<double>>("roi_max_xs", {1.0, 2.0});
-    roi_min_ys_ = declare_parameter<std::vector<double>>("roi_min_ys", {0.0, 0.0});
-    roi_max_ys_ = declare_parameter<std::vector<double>>("roi_max_ys", {1.0, 1.0});
-    roi_min_zs_ = declare_parameter<std::vector<double>>("roi_min_zs", {0.0, 0.0});
-    roi_max_zs_ = declare_parameter<std::vector<double>>("roi_max_zs", {1.0, 1.0});
+    roi_names_ = declare_parameter<std::vector<std::string>>("roi_names", {});
+    roi_min_xs_ = declare_parameter<std::vector<double>>("roi_min_xs", {});
+    roi_max_xs_ = declare_parameter<std::vector<double>>("roi_max_xs", {});
+    roi_min_ys_ = declare_parameter<std::vector<double>>("roi_min_ys", {});
+    roi_max_ys_ = declare_parameter<std::vector<double>>("roi_max_ys", {});
+    roi_min_zs_ = declare_parameter<std::vector<double>>("roi_min_zs", {});
+    roi_max_zs_ = declare_parameter<std::vector<double>>("roi_max_zs", {});
     roi_point_thresholds_ = declare_parameter<std::vector<int64_t>>(
       "roi_point_thresholds",
-      {50, 50});
+      {});
     roi_count_ = valid_roi_count();
 
     const auto qos = rclcpp::SensorDataQoS();

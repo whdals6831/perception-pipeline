@@ -1,3 +1,6 @@
+from os.path import join
+
+from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, OpaqueFunction
 from launch.substitutions import LaunchConfiguration
@@ -40,19 +43,32 @@ def launch_setup(context, *args, **kwargs):
                 value_type=value_type,
             )
 
+    parameter_sources = []
+    roi_config = LaunchConfiguration("roi_config").perform(context)
+    if roi_config != "":
+        parameter_sources.append(roi_config)
+    parameter_sources.append(parameters)
+
     return [
         Node(
             package="lidar_preprocessor",
             executable="lidar_preprocessor_node",
             name="lidar_preprocessor_node",
-            parameters=[parameters],
+            parameters=parameter_sources,
             output="screen",
         )
     ]
 
 
 def generate_launch_description():
+    default_roi_config = join(
+        get_package_share_directory("lidar_preprocessor"),
+        "config",
+        "roi.example.yaml",
+    )
+
     return LaunchDescription(
         [DeclareLaunchArgument(name, default_value="") for name in PARAMETER_TYPES]
+        + [DeclareLaunchArgument("roi_config", default_value=default_roi_config)]
         + [OpaqueFunction(function=launch_setup)]
     )
