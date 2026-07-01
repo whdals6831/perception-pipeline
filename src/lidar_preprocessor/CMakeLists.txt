@@ -2,6 +2,10 @@ cmake_minimum_required(VERSION 3.10)
 if(POLICY CMP0148)
   cmake_policy(SET CMP0148 OLD)
 endif()
+if(POLICY CMP0144)
+  cmake_policy(SET CMP0144 OLD)
+  set(CMAKE_POLICY_DEFAULT_CMP0144 OLD)
+endif()
 
 project(lidar_preprocessor)
 
